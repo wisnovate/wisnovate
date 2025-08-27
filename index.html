@@ -327,6 +327,146 @@
             color: #ccc;
         }
         
+        /* 智能客服样式 */
+        .chat-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        
+        .chat-btn:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+        
+        .chat-btn i {
+            font-size: 24px;
+        }
+        
+        .chat-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 450px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .chat-container.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h3 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message {
+            background-color: #f0f2f5;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .chat-input button {
+            margin-left: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .chat-input button:hover {
+            background-color: var(--secondary-color);
+        }
+        
         /* 响应式设计 */
         @media (max-width: 768px) {
             .navbar {
@@ -393,6 +533,18 @@
             .about-image {
                 order: -1;
             }
+            
+            .chat-container {
+                width: 90%;
+                right: 5%;
+                bottom: 80px;
+                height: 60vh;
+            }
+            
+            .chat-btn {
+                bottom: 20px;
+                right: 20px;
+            }
         }
     </style>
 </head>
@@ -427,6 +579,7 @@
                 <h1>创新科技，智拓未来</h1>
                 <p>智拓创新(上海)致力于为企业提供前沿的Web应用开发和跨平台打包解决方案。</p>
                 <a href="#contact" class="btn">联系我们</a>
+                <a href="#" class="btn" id="product-info-btn" style="margin-left: 15px;">了解产品</a>
             </div>
         </div>
     </section>
@@ -526,6 +679,27 @@
         </div>
     </section>
 
+    <!-- 智能客服 -->
+    <div class="chat-btn" id="chat-btn">
+        <i class="bi bi-chat-dots"></i>
+    </div>
+    
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <h3>智能客服</h3>
+            <button class="close-chat" id="close-chat">×</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot-message">
+                您好！我是智能客服，很高兴为您服务。您可以询问我关于Web应用开发、安卓或Windows应用打包的具体问题。
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="请输入您的问题...">
+            <button id="send-btn"><i class="bi bi-send"></i></button>
+        </div>
+    </div>
+
     <!-- 页脚 -->
     <footer>
         <div class="container">
@@ -593,6 +767,109 @@
                 navLinks.classList.remove('active');
             }
         });
+        
+        // 智能客服功能
+        const chatBtn = document.getElementById('chat-btn');
+        const closeChat = document.getElementById('close-chat');
+        const chatContainer = document.getElementById('chat-container');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const productInfoBtn = document.getElementById('product-info-btn');
+        
+        // 打开聊天窗口
+        chatBtn.addEventListener('click', () => {
+            chatContainer.classList.add('active');
+        });
+        
+        // 通过产品了解按钮打开聊天窗口
+        productInfoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            chatContainer.classList.add('active');
+            // 自动发送一条消息
+            setTimeout(() => {
+                addMessage("我想了解你们的产品和服务", 'user');
+                setTimeout(() => {
+                    addMessage("您好！我们提供Web应用开发和跨平台应用打包服务。具体包括：Web应用开发、Android应用打包、Windows应用打包和跨平台解决方案。请问您想了解哪方面的信息？", 'bot');
+                }, 800);
+            }, 500);
+        });
+        
+        // 关闭聊天窗口
+        closeChat.addEventListener('click', () => {
+            chatContainer.classList.remove('active');
+        });
+        
+        // 发送消息
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, 'user');
+                userInput.value = '';
+                
+                // 模拟客服回复
+                setTimeout(() => {
+                    let response = generateResponse(message);
+                    addMessage(response, 'bot');
+                }, 800);
+            }
+        }
+        
+        // 按回车发送消息
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 点击发送按钮
+        sendBtn.addEventListener('click', sendMessage);
+        
+        // 添加消息到聊天窗口
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+            messageDiv.textContent = text;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 生成客服回复
+        function generateResponse(message) {
+            message = message.toLowerCase();
+            
+            if (message.includes('安卓') && (message.includes('价格') || message.includes('多少钱'))) {
+                return "Web应用打包成安卓应用的价格是9.9元起，具体价格根据应用复杂程度而定。";
+            } else if (message.includes('windows') && (message.includes('价格') || message.includes('多少钱'))) {
+                return "Web应用打包成Windows应用的价格是19.9元起，具体价格根据应用复杂程度而定。";
+            } else if (message.includes('打包') && (message.includes('价格') || message.includes('多少钱'))) {
+                return "我们现在支持将Web应用打包成安卓应用(9.9元起)和Windows应用(19.9元起)。请问您需要哪种平台的打包服务？";
+            } else if (message.includes('web') && (message.includes('制作') || message.includes('开发')) && (message.includes('价格') || message.includes('多少钱'))) {
+                return "Web应用制作由我们的合作伙伴CR睿造智能科技工作室(株洲)提供技术支持，价格约为29.9元起，具体根据项目需求定价。";
+            } else if (message.includes('你好') || message.includes('您好') || message.includes('嗨')) {
+                return "您好！我是智能客服，很高兴为您服务。您可以询问我关于Web应用开发、安卓或Windows应用打包的具体问题。";
+            } else if (message.includes('服务') || message.includes('产品')) {
+                return "我们提供Web应用开发和跨平台应用打包服务。具体包括：Web应用开发、Android应用打包、Windows应用打包和跨平台解决方案。您想了解哪方面的详细信息？";
+            } else if (message.includes('联系') || message.includes('电话') || message.includes('邮箱')) {
+                return "您可以通过邮箱wisnovate@126.com联系我们，我们的专业团队会尽快回复您的问题。";
+            } else if (
+                message.includes('web') || 
+                message.includes('应用') || 
+                message.includes('打包') || 
+                message.includes('安卓') || 
+                message.includes('android') || 
+                message.includes('windows') || 
+                message.includes('window') || 
+                message.includes('开发') || 
+                message.includes('制作')
+            ) {
+                return "没有查询到您所说的内容。您可以询问我关于Web应用开发、安卓或Windows应用打包的具体问题。";
+            } else {
+                return "没有查询到您所说的内容。您可以询问我关于Web应用开发、安卓或Windows应用打包的具体问题。";
+            }
+        }
     </script>
 </body>
 </html>
